@@ -443,10 +443,11 @@ export class AIPlayer {
                 `[AI ${this.name}] Producing Settler in city ${city.name}.`
               );
               city.produceUnit("Settler");
+              this.resources.gold -= UNIT_PRODUCTION_COST["Settler"]; // Pay for Settler
               return;
             }
           }
-
+  
           // Otherwise, produce Warrior if possible
           if (this.aggression >= 0.5) {
             if (this.resources.gold >= UNIT_PRODUCTION_COST["Warrior"]) {
@@ -454,6 +455,7 @@ export class AIPlayer {
                 `[AI ${this.name}] Producing Warrior in city ${city.name}.`
               );
               city.produceUnit("Warrior");
+              this.resources.gold -= UNIT_PRODUCTION_COST["Warrior"]; // Pay for Warrior
               return;
             }
           } else {
@@ -462,6 +464,7 @@ export class AIPlayer {
                 `[AI ${this.name}] Producing Warrior in city ${city.name} due to population-based limit.`
               );
               city.produceUnit("Warrior");
+              this.resources.gold -= UNIT_PRODUCTION_COST["Warrior"]; // Pay for Warrior
               return;
             }
           }

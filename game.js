@@ -1264,21 +1264,15 @@ class Game {
   }
 
   updateCities() {
-    // Reset player gold each turn before calculating
-    this.playerResources.gold = 0;
-  
     this.playerResources.cities.forEach((city) => {
       city.updateProduction(this, this.playerResources);
-      this.playerResources.gold += city.gold; // Add city gold to total
+      this.playerResources.gold += city.calculateGoldProduction(); // Add city gold to total
     });
   
     this.AIs.forEach((ai) => {
-      // Reset AI gold each turn before calculating
-      ai.resources.gold = 0;
-  
       ai.cities.forEach((city) => {
         city.updateProduction(this, ai.resources);
-        ai.resources.gold += city.gold; // Add city gold to total
+        ai.resources.gold += city.calculateGoldProduction(); // Add city gold to total
       });
     });
   }
@@ -1290,7 +1284,7 @@ class Game {
     if (this.playerResources.gold < 0) {
       this.updateNotification("You are running low on gold!");
     }
-
+  
     this.AIs.forEach((ai) => {
       const totalAICost = ai.units.length * MAINTENANCE_COST;
       ai.resources.gold -= totalAICost;
@@ -1298,94 +1292,93 @@ class Game {
         this.updateNotification(`${ai.name} is running low on gold!`);
       }
     });
-
+  
     this.updateResourcePanel();
   }
 
-  buyUnitFromCity(city, unitType) {
-    const cost = UNIT_PRODUCTION_COST[unitType];
+buyUnitFromCity(city, unitType) {
+  const cost = UNIT_PRODUCTION_COST[unitType];
 
-    if (city.owner === "player") {
-      if (this.playerResources.gold >= cost) {
-        if (this.canProduceUnit()) {
-          const placement = this.findFreeAdjacentTile(city.x, city.y);
-          if (placement) {
-            const tileType = this.getTileType(placement.x, placement.y);
+  if (city.owner === "player") {
+    if (this.playerResources.gold >= cost) {
+      if (this.canProduceUnit()) {
+        const placement = this.findFreeAdjacentTile(city.x, city.y);
+        if (placement) {
+          const tileType = this.getTileType(placement.x, placement.y);
 
-            if (tileType === "Water" || tileType === "Mountain") {
-              this.updateNotification(
-                `Cannot place ${unitType} on ${tileType} tile.`
-              );
-              return;
-            }
-
-            this.playerResources.gold -= cost;
-            const newUnit = this.createUnit(
-              unitType,
-              placement.x,
-              placement.y,
-              "player"
+          if (tileType === "Water" || tileType === "Mountain") {
+            this.updateNotification(
+              `Cannot place ${unitType} on ${tileType} tile.`
             );
-            this.updateNotification(`Purchased a ${unitType}!`);
-            city.hasActed = true;
-            this.updateActionsRemaining();
-            this.displayCityMenu(city);
-          } else {
-            this.updateNotification(`No space to place a new ${unitType}.`);
+            return;
           }
+
+          this.playerResources.gold -= cost;
+          const newUnit = this.createUnit(
+            unitType,
+            placement.x,
+            placement.y,
+            "player"
+          );
+          this.updateNotification(`Purchased a ${unitType}!`);
+          city.hasActed = true;
+          this.updateActionsRemaining();
+          this.displayCityMenu(city);
+        } else {
+          this.updateNotification(`No space to place a new ${unitType}.`);
+        }
+      } else {
+        this.updateNotification(
+          `Unit limit reached. Grow your cities to increase the limit.`
+        );
+      }
+    } else {
+      this.updateNotification(`Not enough gold to purchase a ${unitType}.`);
+    }
+  } else {
+    const aiPlayer = this.AIs.find((ai) => ai.name === city.owner);
+    if (aiPlayer && aiPlayer.resources.gold >= cost) {
+      if (aiPlayer.canProduceUnit()) {
+        const placement = this.findFreeAdjacentTile(city.x, city.y);
+        if (placement) {
+          const tileType = this.getTileType(placement.x, placement.y);
+
+          if (tileType === "Water" || tileType === "Mountain") {
+            this.updateNotification(
+              `Cannot place ${unitType} on ${tileType} tile.`
+            );
+            return;
+          }
+
+          aiPlayer.resources.gold -= cost; // Deduct cost from AI gold
+          const newUnit = this.createUnit(
+            unitType,
+            placement.x,
+            placement.y,
+            aiPlayer.name
+          );
+          this.updateNotification(
+            `${aiPlayer.name} purchased a ${unitType}!`
+          );
+          city.hasActed = true;
         } else {
           this.updateNotification(
-            `Unit limit reached. Grow your cities to increase the limit.`
+            `${aiPlayer.name} has no space to place a new ${unitType}.`
           );
         }
       } else {
-        this.updateNotification(`Not enough gold to purchase a ${unitType}.`);
-      }
-    } else {
-      const aiPlayer = this.AIs.find((ai) => ai.name === city.owner);
-      if (aiPlayer && aiPlayer.resources.gold >= cost) {
-        // Check if AI can produce a unit based on population
-        if (aiPlayer.canProduceUnit()) { 
-          const placement = this.findFreeAdjacentTile(city.x, city.y);
-          if (placement) {
-            const tileType = this.getTileType(placement.x, placement.y);
-  
-            if (tileType === "Water" || tileType === "Mountain") {
-              this.updateNotification(
-                `Cannot place ${unitType} on ${tileType} tile.`
-              );
-              return;
-            }
-  
-            aiPlayer.resources.gold -= cost;
-            const newUnit = this.createUnit(
-              unitType,
-              placement.x,
-              placement.y,
-              aiPlayer.name
-            );
-            this.updateNotification(
-              `${aiPlayer.name} purchased a ${unitType}!`
-            );
-            city.hasActed = true;
-          } else {
-            this.updateNotification(
-              `${aiPlayer.name} has no space to place a new ${unitType}.`
-            );
-          }
-        } else {
-          this.updateNotification(
-            `${aiPlayer.name} has reached its unit limit.`
-          );
-        }
-      } else if (aiPlayer) {
         this.updateNotification(
-          `${aiPlayer.name} does not have enough gold to purchase a ${unitType}.`
+          `${aiPlayer.name} has reached its unit limit.`
         );
       }
+    } else if (aiPlayer) {
+      this.updateNotification(
+        `${aiPlayer.name} does not have enough gold to purchase a ${unitType}.`
+      );
     }
-    this.updateResourcePanel();
   }
+  this.updateResourcePanel();
+}
 
   findNearestCity(unit) {
     let nearestCity = null;
