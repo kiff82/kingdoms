@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Civilization Game</title>
+  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+  <!-- Header -->
+  <header>
+    <h1>Civilization Game</h1>
+  </header>
+
+  <!-- CORS Warning -->
+  <div id="corsWarning" class="visually-hidden" role="alert" aria-live="assertive">
+    <p>
+      <strong>Warning:</strong> This game requires running on a local web server to function correctly. Please start a local server and access the game via <code>http://</code> or <code>https://</code>.
+    </p>
+  </div>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Start Screen -->
+    <section id="startScreen" class="screen active" aria-labelledby="startTitle" role="dialog" aria-modal="true">
+      <h2 id="startTitle">Welcome to Civilization Game</h2>
+      <p>Click below to start your journey!</p>
+      <button id="startButton" aria-label="Start the Civilization Game">Start Game</button>
+    </section>
+
+    <!-- Leader Selection Screen -->
+    <section id="leaderSelectionScreen" class="screen" aria-labelledby="leaderSelectionTitle" role="dialog"
+      aria-modal="true">
+      <h2 id="leaderSelectionTitle">Select Your Leader</h2>
+      <ul id="leaderList" aria-label="Available Leaders" role="listbox"></ul>
+      <div id="leaderInfo" aria-live="polite">
+        <h3>Leader Information</h3>
+        <p id="leaderDetailsText">Select a leader to see details</p>
+        <!-- Leader image will be displayed here when selected -->
+      </div>
+      <button id="startGame" aria-label="Start the Game">Start Game</button>
+    </section>
+
+    <!-- Game Area -->
+    <section id="gameArea" class="screen" aria-labelledby="gameTitle" role="main">
+      <div id="leftPanelContainer" style="width: var(--left-panel-width);">  <!-- Added Container for Left Panel -->
+        <div id="leftPanel">
+            </div>
+      </div>
+      <div id="mapContainer">
+        <h2 id="gameTitle" class="visually-hidden">Game Map</h2>
+        <div id="map" aria-label="Game Map" tabindex="0">
+          <!-- Tiles will be dynamically generated here -->
+        </div>
+      </div>
+      <aside id="sidebar" aria-labelledby="sidebarTitle">
+        <h2 id="sidebarTitle">Game Information</h2>
+
+        <section id="gameInfoPanel">
+          <!-- Resource Panel -->
+          <section id="resourcePanel"></section>
+
+          <!-- Actions Remaining -->
+          <section id="actionsPanel"></section>
+
+          <!-- Notification Panel -->
+          <section id="notificationPanel"></section>
+        </section>
+
+        <button id="helpButton" aria-label="Open Help Menu">Help</button>
+
+        <section id="helpPanel" hidden aria-labelledby="helpTitle">
+          <h3 id="helpTitle">Help Menu</h3>
+          <button id="closeHelp" aria-label="Close Help Menu">Close</button>
+          <div id="helpContent">
+            <h4>Units</h4>
+            <ul>
+              <li><strong>Settler:</strong> Used to found new cities.</li>
+              <li><strong>Warrior:</strong> Basic combat unit, capable of attacking enemies.</li>
+              <li><strong>Explorer:</strong> Reveals surrounding tiles and explores the map.</li>
+              <li><strong>Worker:</strong> Gathers resources and constructs buildings.</li>
+            </ul>
+            <h4>Buildings</h4>
+            <ul>
+              <li><strong>Farm:</strong> Increases food production.</li>
+              <li><strong>Barracks:</strong> Enhances military unit production.</li>
+              <li><strong>LumberMill:</strong> Boosts wood production.</li>
+              <li><strong>Mine:</strong> Increases gold production.</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Unit and City Panels will be added here dynamically -->
+      </aside>
+
+      <button id="endTurn" aria-label="End Your Turn">End Turn</button>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2024 Civilization Game. All rights reserved.</p>
+  </footer>
+
+  <script type="module">
+    // Check if the game is being served via file:// protocol
+    if (window.location.protocol === 'file:') {
+      const warning = document.getElementById('corsWarning');
+      warning.classList.remove('visually-hidden');
+      warning.classList.add('active');
+    }
+  </script>
+  <script type="module" src="game.js"></script>
+</body>
+
+</html>

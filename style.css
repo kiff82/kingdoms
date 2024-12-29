@@ -1,0 +1,558 @@
+/* style.css */
+
+/* CSS Variables for Consistency and Maintainability */
+:root {
+  --tile-size: 60px;
+  --tile-size-mobile: 40px;
+
+  --color-background: #2c3e50;
+  --color-primary: #ecf0f1;
+  --color-secondary: #34495e;
+  --color-accent: #1abc9c;
+  --color-danger: #e74c3c;
+  --color-warning: #f1c40f;
+  --color-success: #27ae60;
+  --water-color: #3498db;
+
+  --forest-color: #27ae60;
+  --hills-color: #95a5a6;
+  --plains-color: #f1c40f;
+  --mountain-color: #7f8c8d;
+
+  /* Make tile borders thinner and white */
+  --tile-border: 0.5px solid #fff;
+
+  --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-size-base: 16px;
+  --font-size-large: 24px;
+  --font-size-small: 14px;
+
+  --transition-speed: 0.3s;
+
+  --sidebar-width-desktop: 300px;
+  --sidebar-width-tablet: 250px;
+  --sidebar-width-mobile: 100%;
+
+  --left-panel-width: 300px;
+  --left-panel-width-tablet: 250px;
+  --left-panel-width-mobile: 100%;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body,
+html {
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-family);
+  background-color: var(--color-background);
+  color: var(--color-primary);
+  overflow: hidden;
+}
+
+header,
+footer {
+  background-color: var(--color-secondary);
+  color: var(--color-primary);
+  text-align: center;
+  padding: 10px 0;
+}
+
+header h1,
+footer p {
+  margin: 0;
+  font-size: var(--font-size-large);
+}
+
+.screen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 80px);
+  width: 100%;
+}
+
+.screen.active {
+  display: flex;
+}
+
+#startScreen p {
+  margin-bottom: 20px;
+}
+
+#startButton {
+  padding: 15px 30px;
+  font-size: var(--font-size-base);
+  background-color: var(--color-accent);
+  border: none;
+  color: var(--color-primary);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color var(--transition-speed);
+}
+
+#startButton:hover,
+#startButton:focus {
+  background-color: #16a085;
+  outline: none;
+}
+
+#leaderSelectionScreen ul#leaderList {
+  list-style: none;
+  padding: 0;
+  width: 80%;
+  max-width: 400px;
+}
+
+#leaderSelectionScreen ul#leaderList li {
+  padding: 15px;
+  margin: 10px 0;
+  background-color: var(--color-secondary);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color var(--transition-speed);
+  display: flex;
+  align-items: center;
+}
+
+#leaderSelectionScreen ul#leaderList li:hover,
+#leaderSelectionScreen ul#leaderList li:focus {
+  background-color: var(--color-accent);
+  outline: none;
+}
+
+#leaderSelectionScreen #leaderInfo {
+  margin: 20px 0;
+  padding: 15px;
+  background-color: var(--color-secondary);
+  border-radius: 5px;
+  width: 80%;
+  max-width: 400px;
+  text-align: center;
+}
+
+#leaderSelectionScreen #leaderInfo h3 {
+  margin-bottom: 10px;
+}
+
+#leaderSelectionScreen #leaderInfo #leaderDetailsText {
+  margin-bottom: 20px;
+}
+
+.leader-portrait {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 5px;
+  margin-right: 15px;
+}
+
+.leader-portrait-large {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
+  margin: 0 auto 15px auto;
+}
+
+#gameArea {
+  display: flex;
+  flex-direction: row;
+  height: calc(100vh - 80px);
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+#mapContainer {
+  flex-grow: 1;
+  overflow: auto;
+  position: relative;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#map {
+  display: grid;
+  grid-template-columns: repeat(30, var(--tile-size));
+  grid-auto-rows: var(--tile-size);
+  gap: 1px;
+  padding: 10px;
+  background-color: var(--color-secondary);
+  width: max-content;
+  height: 100%;
+  overflow: auto;
+}
+
+/* Tiles now have thinner, white lines */
+.tile {
+  width: var(--tile-size);
+  height: var(--tile-size);
+  border: var(--tile-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-large);
+  font-weight: bold;
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.tile.hidden {
+  background-image: none;
+  background-color: var(--color-background);
+}
+
+.tile.Forest {
+  background-image: url('./Tiles/forest_tile.jpg');
+}
+
+.tile.Hills {
+  background-image: url('./Tiles/hills_tile.jpg');
+}
+
+.tile.Plains {
+  background-image: url('./Tiles/plains_tile.jpg');
+}
+
+.tile.Mountain {
+  background-image: url('./Tiles/mountain.jpg');
+}
+
+.tile.Water {
+  background-image: url('./Tiles/water_tile.jpg');
+}
+
+/* Owner-Based Border Colors */
+.player-unit {
+  border: 2px solid blue;
+}
+
+.ai1-unit {
+  border: 2px solid red;
+}
+
+.ai2-unit {
+  border: 2px solid yellow;
+}
+
+.ai1-city {
+  border: 2px solid red;
+}
+
+.ai2-city {
+  border: 2px solid yellow;
+}
+
+.tile.city {
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  color: var(--color-primary);
+  font-size: 20px;
+}
+
+.tile.selected {
+  border: 2px solid var(--color-danger);
+  box-shadow: 0 0 10px var(--color-warning);
+}
+
+.tile.city .unit-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.tile.highlighted {
+  border: 2px solid var(--color-warning);
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+#sidebar {
+  width: var(--sidebar-width-desktop);
+  background-color: var(--color-secondary);
+  padding: 20px;
+  overflow-y: auto;
+  transition: all var(--transition-speed);
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+#leftPanelContainer {
+  width: var(--left-panel-width);
+  overflow-y: auto;
+  transition: all var(--transition-speed);
+  background-color: var(--color-secondary);
+  padding: 20px;
+}
+
+@media (max-width: 1024px) {
+  #sidebar {
+    width: var(--sidebar-width-tablet);
+  }
+  #leftPanel {
+    width: var(--left-panel-width-tablet);
+  }
+}
+
+@media (max-width: 768px) {
+  #sidebar {
+    width: var(--sidebar-width-mobile);
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    background-color: rgba(52, 73, 94, 0.95);
+    transform: translateX(100%);
+    transition: transform var(--transition-speed) ease;
+    z-index: 1000;
+  }
+
+  #sidebar.active {
+    transform: translateX(0);
+  }
+
+  #leftPanel {
+    width: var(--left-panel-width-mobile);
+  }
+
+  #endTurn {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+}
+
+#mapContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#map {
+  flex-grow: 1;
+  overflow: auto;
+}
+
+button:focus,
+.tile:focus {
+  outline: 2px solid var(--color-warning);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+#map::-webkit-scrollbar {
+  width: 8px;
+}
+
+#map::-webkit-scrollbar-track {
+  background: var(--color-secondary);
+}
+
+#map::-webkit-scrollbar-thumb {
+  background-color: var(--color-accent);
+  border-radius: 4px;
+}
+
+#notifications {
+  list-style: none;
+  padding: 0;
+}
+
+#notifications li {
+  padding: 10px;
+  margin-bottom: 5px;
+  background-color: var(--color-secondary);
+  border-left: 5px solid var(--color-accent);
+  border-radius: 3px;
+  font-size: var(--font-size-small);
+  transition: background-color var(--transition-speed);
+}
+
+#notifications li:hover {
+  background-color: var(--color-primary);
+  color: var(--color-background);
+}
+
+#cityPanel {
+  background-color: var(--color-secondary);
+  padding: 15px;
+  border-radius: 5px;
+}
+
+#cityPanel h3,
+#cityPanel h4 {
+  margin-bottom: 10px;
+  font-size: var(--font-size-base);
+}
+
+#cityPanel ul {
+  list-style: none;
+  padding: 0;
+}
+
+#cityPanel ul li {
+  padding: 5px;
+  margin-bottom: 5px;
+  background-color: var(--color-primary);
+  color: var(--color-background);
+  border-radius: 3px;
+  font-size: var(--font-size-small);
+}
+
+#helpButton {
+  width: 100%;
+  padding: 10px;
+  margin-top: 20px;
+  background-color: var(--color-accent);
+  border: none;
+  border-radius: 5px;
+  color: var(--color-primary);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: background-color var(--transition-speed);
+}
+
+#helpButton:hover,
+#helpButton:focus {
+  background-color: #16a085;
+  outline: none;
+}
+
+.unit-icon {
+  height: 20px;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+#helpPanel {
+  background-color: var(--color-secondary);
+  padding: 15px;
+  border-radius: 5px;
+  margin-top: 20px;
+}
+
+#helpPanel h3 {
+  margin-bottom: 10px;
+}
+
+#helpPanel #closeHelp {
+  background-color: var(--color-danger);
+  border: none;
+  color: var(--color-primary);
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color var(--transition-speed);
+}
+
+#helpPanel #closeHelp:hover,
+#helpPanel #closeHelp:focus {
+  background-color: #c0392b;
+  outline: none;
+}
+
+#helpPanel h4 {
+  margin-top: 15px;
+}
+
+#helpPanel ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+#helpPanel ul li {
+  margin-bottom: 10px;
+  font-size: var(--font-size-small);
+}
+
+.unit-image {
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.unit-settler { /* Add specific styles for settler if needed */ }
+.unit-warrior { /* Add specific styles for warrior if needed */ }
+.unit-hero    { /* Add specific styles for hero if needed */ }
+
+.tile.selected {
+  box-shadow: 0 0 10px var(--color-warning);
+}
+
+.tile.unit.attacking {
+  animation: attackAnimation 0.5s forwards;
+}
+
+@keyframes attackAnimation {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.leader-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.leader-title {
+  font-size: var(--font-size-small);
+  color: var(--color-primary);
+}
