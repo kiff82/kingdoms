@@ -556,3 +556,9 @@ button:focus,
   font-size: var(--font-size-small);
   color: var(--color-primary);
 }
+
+/* In your style.css, add a new class for attack-highlight */
+.tile.attack-highlight {
+  border: 2px solid red;
+  animation: blink 1s infinite;
+}

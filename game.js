@@ -88,6 +88,7 @@ class Game {
     this.showStartScreen();
     this.createGameInfoPanel();
     this.updateUI();
+    this.setupKeyboardInput(); // Add keyboard input handling
   }
 
   setupEventListeners() {
@@ -124,6 +125,99 @@ class Game {
       this.closeHelpButton.addEventListener("click", () => {
         this.helpPanel.hidden = true;
       });
+    }
+  }
+
+  setupKeyboardInput() {
+    document.addEventListener("keydown", (event) => {
+      if (this.currentPlayer !== "player") return;
+
+      const selectedUnit = this.selectedUnit;
+      const selectedCity = this.selectedCity;
+
+      if (selectedUnit && !selectedUnit.hasActed) {
+        switch (event.key) {
+          case "m": // Move
+            this.toggleUnitMove(selectedUnit);
+            break;
+          case "s": // Settle (for Settlers)
+            if (selectedUnit.type === "Settler") {
+              this.settleCity(selectedUnit);
+            }
+            break;
+          case "a": // Attack
+            if (selectedUnit.type === "Warrior" || selectedUnit.type === "Hero") {
+              this.toggleAttackMode(selectedUnit);
+            }
+            break;
+          case " ": // Skip
+            selectedUnit.skipAction(this);
+            break;
+        }
+      } else if (selectedCity && !selectedCity.hasActed) {
+        // City-specific shortcuts (if needed in the future)
+      } else if (event.key === "Escape") {
+        this.deselectUnit();
+      }
+    });
+  }
+
+  toggleAttackMode(unit) {
+    if (this.attackMode) {
+      this.attackMode = false;
+      this.removeHighlights();
+    } else {
+      this.attackMode = true;
+      this.movementMode = false; // Ensure movement mode is off
+      this.removeHighlights();
+      this.highlightAttackRange(unit);
+    }
+  }
+
+  highlightAttackRange(unit) {
+    const range = 1; // Melee attack range
+    const visited = new Set();
+    const queue = [{ x: unit.x, y: unit.y, remaining: range }];
+
+    while (queue.length > 0) {
+      const { x, y, remaining } = queue.shift();
+      const tileKey = `${x},${y}`;
+      if (visited.has(tileKey) || remaining < 0) continue;
+      visited.add(tileKey);
+
+      const occupant = this.mapState[y][x].occupant;
+      if (occupant && occupant.owner !== unit.owner) {
+        const tile = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+        if (tile) {
+          tile.classList.add("attack-highlight"); // Use a different highlight class
+        }
+      }
+
+      if (remaining > 0) {
+        const directions = [
+          { dx: -1, dy: 0 },
+          { dx: 1, dy: 0 },
+          { dx: 0, dy: -1 },
+          { dx: 0, dy: 1 },
+          { dx: -1, dy: -1 },
+          { dx: -1, dy: 1 },
+          { dx: 1, dy: -1 },
+          { dx: 1, dy: 1 },
+        ];
+
+        for (const dir of directions) {
+          const newX = x + dir.dx;
+          const newY = y + dir.dy;
+          if (
+            newX >= 0 &&
+            newX < MAP_SIZE &&
+            newY >= 0 &&
+            newY < MAP_SIZE
+          ) {
+            queue.push({ x: newX, y: newY, remaining: remaining - 1 });
+          }
+        }
+      }
     }
   }
 
@@ -401,7 +495,17 @@ class Game {
       (u) => u.x === x && u.y === y && u.owner === "player"
     );
 
-    if (this.movementMode && this.selectedUnit) {
+    if (this.attackMode && this.selectedUnit) {
+      if (tileElement.classList.contains("attack-highlight")) {
+        const target = this.mapState[y][x].occupant;
+        if (target && target.owner !== this.selectedUnit.owner) {
+          this.selectedUnit.attackUnit(target, this);
+        }
+        this.attackMode = false;
+        this.deselectUnit();
+        this.removeHighlights();
+      }
+    } else if (this.movementMode && this.selectedUnit) {
       if (tileElement.classList.contains("highlighted")) {
         this.moveUnit(this.selectedUnit, x, y);
         this.deselectUnit();
@@ -446,8 +550,11 @@ class Game {
   removeHighlights() {
     if (this.mapElement) {
       this.mapElement
-        .querySelectorAll(".highlighted")
-        .forEach((tile) => tile.classList.remove("highlighted"));
+        .querySelectorAll(".highlighted, .attack-highlight")
+        .forEach((tile) => {
+          tile.classList.remove("highlighted");
+          tile.classList.remove("attack-highlight");
+        });
     }
   }
 
@@ -466,11 +573,16 @@ class Game {
       <p>Movement: ${unit.movementRemaining}/${unit.movement}</p>
       ${
         unit.type === "Settler"
-          ? `<button id="settleCityBtn">Settle City</button>`
+          ? `<button id="settleCityBtn" data-keybind="s">Settle City (S)</button>`
           : ""
       }
-      <button id="moveUnitBtn">Move Unit</button>
-      <button id="skipActionBtn">Skip Action</button>
+      ${
+        unit.type === "Warrior" || unit.type === "Hero"
+          ? `<button id="attackBtn" data-keybind="a">Attack (A)</button>`
+          : ""
+      }
+      <button id="moveUnitBtn" data-keybind="m">Move Unit (M)</button>
+      <button id="skipActionBtn" data-keybind="Space">Skip Action (Space)</button>
     `;
 
     this.leftPanel.appendChild(unitMenu);
@@ -479,6 +591,13 @@ class Game {
       const settleBtn = document.getElementById("settleCityBtn");
       if (settleBtn) {
         settleBtn.addEventListener("click", () => this.settleCity(unit));
+      }
+    }
+
+    if (unit.type === "Warrior" || unit.type === "Hero") {
+      const attackBtn = document.getElementById("attackBtn");
+      if (attackBtn) {
+        attackBtn.addEventListener("click", () => this.toggleAttackMode(unit));
       }
     }
 
@@ -1239,6 +1358,11 @@ class Game {
     this.resetCities();
     this.updateCities();
     this.payMaintenance();
+
+    // Regenerate health for all units
+    this.units.forEach((unit) => {
+      unit.regenerateHealth();
+    });
 
     if (this.currentPlayer === "player") {
       this.currentPlayer = "AI"; 
